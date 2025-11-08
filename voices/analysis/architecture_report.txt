@@ -1,0 +1,82 @@
+================================================================================
+KOKORO-82M ARCHITECTURE REPORT
+================================================================================
+
+OVERVIEW
+--------------------------------------------------------------------------------
+Total Parameters: 81,810,022
+Model Size: ~81.8M parameters
+
+MODULE PARAMETER DISTRIBUTION
+--------------------------------------------------------------------------------
+bert                :    6,292,480 (  7.7%)
+bert_encoder        :      393,728 (  0.5%)
+predictor           :   16,203,828 ( 19.8%)
+text_encoder        :    5,606,400 (  6.9%)
+decoder             :   53,313,586 ( 65.2%)
+
+BERT ENCODER (CustomAlbert)
+--------------------------------------------------------------------------------
+Vocabulary Size: 178
+Hidden Size: 768
+Num Layers: 12
+Attention Heads: 12
+Max Position Embeddings: 512
+
+PROSODY PREDICTOR
+--------------------------------------------------------------------------------
+Text Encoder Parameters: 5,913,600
+Main LSTM: 640 -> 256 x 1
+F0 Branch Blocks: 3
+N Branch Blocks: 3
+
+TEXT ENCODER
+--------------------------------------------------------------------------------
+Embedding: 178 tokens, 512 dims
+CNN Layers: 3
+LSTM: 512 -> 256
+
+DECODER (iSTFTNet)
+--------------------------------------------------------------------------------
+Encode Block Parameters: 5,656,072
+Decode Blocks: 4
+Generator Parameters: 19,685,942
+  Upsampling Blocks: 2
+  Residual Blocks: 6
+
+DATA FLOW
+--------------------------------------------------------------------------------
+
+Input Processing:
+  Convert phonemes to input_ids using vocab
+  Input: [B, T]
+  Output: [B, T]
+
+BERT Encoding:
+  Process input_ids through ALBERT to get contextualized embeddings
+  Input: [B, T]
+  Output: [B, T, 768]
+
+BERT Projection:
+  Project BERT outputs to hidden dimension
+  Input: [B, T, 768]
+  Output: [B, hidden_dim, T]
+
+Duration Prediction:
+  Predict phoneme durations using prosody style
+
+F0 and N Prediction:
+  Predict pitch (F0) and noise (N) contours
+
+Text Encoding:
+  Encode input through CNN+LSTM
+  Output: [B, hidden_dim, T]
+
+Alignment:
+  Apply predicted alignment to expand features
+
+Decoding:
+  Generate audio using iSTFTNet decoder
+  Output: [audio_samples]
+
+================================================================================

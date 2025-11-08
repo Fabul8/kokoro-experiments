@@ -1,0 +1,89 @@
+================================================================================
+KOKORO VOICE ANALYSIS REPORT
+================================================================================
+
+VOICE STATISTICS
+--------------------------------------------------------------------------------
+Total voices analyzed: 50
+Voice groups: 16
+  af: 11 voices
+  am: 9 voices
+  bf: 4 voices
+  bm: 4 voices
+  ef: 1 voices
+  em: 2 voices
+  ff: 1 voices
+  hf: 2 voices
+  hm: 2 voices
+  if: 1 voices
+  im: 1 voices
+  jf: 4 voices
+  jm: 1 voices
+  pf: 1 voices
+  pm: 2 voices
+  zf: 4 voices
+
+PCA ANALYSIS
+--------------------------------------------------------------------------------
+
+DECODER Layer:
+  PC1 variance explained: 17.35%
+  PC1-5 cumulative: 50.08%
+  PC1-10 cumulative: 68.93%
+
+PROSODY Layer:
+  PC1 variance explained: 20.69%
+  PC1-5 cumulative: 57.15%
+  PC1-10 cumulative: 75.81%
+
+BOTH Layer:
+  PC1 variance explained: 15.50%
+  PC1-5 cumulative: 51.28%
+  PC1-10 cumulative: 69.72%
+
+INTER-LAYER CORRELATION
+--------------------------------------------------------------------------------
+Mean absolute correlation: 0.1873
+Max absolute correlation: 0.7738
+Correlation > 0.5: 413 pairs
+Correlation > 0.7: 6 pairs
+
+CENTROID ANALYSIS
+--------------------------------------------------------------------------------
+Overall centroid norm: 1.8765
+
+Group distances from overall centroid:
+  af: 0.7922
+  am: 0.9595
+  bf: 1.3625
+  bm: 1.3644
+  ef: 1.4919
+  em: 1.6350
+  ff: 2.2294
+  hf: 1.9473
+  hm: 2.2055
+  if: 2.2941
+  im: 2.6502
+  jf: 2.2550
+  jm: 2.1354
+  pf: 1.4334
+  pm: 1.5801
+  zf: 2.0381
+
+MOST VARIABLE DIMENSIONS
+--------------------------------------------------------------------------------
+Decoder layer (top 5):
+  1. Dimension 77: variance = 0.043894
+  2. Dimension 127: variance = 0.041395
+  3. Dimension 8: variance = 0.039281
+  4. Dimension 15: variance = 0.038863
+  5. Dimension 48: variance = 0.037033
+
+Prosody layer (top 5):
+  1. Dimension 74: variance = 0.091166
+  2. Dimension 52: variance = 0.049896
+  3. Dimension 5: variance = 0.041078
+  4. Dimension 125: variance = 0.037964
+  5. Dimension 114: variance = 0.033803
+
+================================================================================

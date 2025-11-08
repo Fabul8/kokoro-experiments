@@ -1,0 +1,89 @@
+================================================================================
+INCREMENTAL PCA ANALYSIS REPORT
+================================================================================
+
+
+DECODER LAYER
+--------------------------------------------------------------------------------
+Target variance: 99.99%
+Total voices analyzed: 50
+
+Final results (all 50 voices):
+  Components needed: 47
+  Variance explained: 99.9963%
+  Max possible components: 50
+  Utilization: 94.00%
+
+Plateau analysis:
+  90% of final components reached at voice 46
+  Voice: am_adam
+
+First 10 voices:
+   1. af_nova              (af):   1 components
+   2. am_fenrir            (am):   1 components
+   3. bf_alice             (bf):   2 components
+   4. bm_daniel            (bm):   3 components
+   5. ef_dora              (ef):   4 components
+   6. em_santa             (em):   5 components
+   7. ff_siwis             (ff):   6 components
+   8. hf_beta              (hf):   7 components
+   9. hm_omega             (hm):   8 components
+  10. if_sara              (if):   9 components
+
+
+PROSODY LAYER
+--------------------------------------------------------------------------------
+Target variance: 99.99%
+Total voices analyzed: 50
+
+Final results (all 50 voices):
+  Components needed: 47
+  Variance explained: 99.9909%
+  Max possible components: 50
+  Utilization: 94.00%
+
+Plateau analysis:
+  90% of final components reached at voice 45
+  Voice: af_jessica
+
+First 10 voices:
+   1. af_nova              (af):   1 components
+   2. am_fenrir            (am):   1 components
+   3. bf_alice             (bf):   2 components
+   4. bm_daniel            (bm):   3 components
+   5. ef_dora              (ef):   4 components
+   6. em_santa             (em):   5 components
+   7. ff_siwis             (ff):   6 components
+   8. hf_beta              (hf):   7 components
+   9. hm_omega             (hm):   8 components
+  10. if_sara              (if):   9 components
+
+
+BOTH LAYER
+--------------------------------------------------------------------------------
+Target variance: 99.99%
+Total voices analyzed: 50
+
+Final results (all 50 voices):
+  Components needed: 47
+  Variance explained: 99.9903%
+  Max possible components: 50
+  Utilization: 94.00%
+
+Plateau analysis:
+  90% of final components reached at voice 45
+  Voice: af_jessica
+
+First 10 voices:
+   1. af_nova              (af):   1 components
+   2. am_fenrir            (am):   1 components
+   3. bf_alice             (bf):   2 components
+   4. bm_daniel            (bm):   3 components
+   5. ef_dora              (ef):   4 components
+   6. em_santa             (em):   5 components
+   7. ff_siwis             (ff):   6 components
+   8. hf_beta              (hf):   7 components
+   9. hm_omega             (hm):   8 components
+  10. if_sara              (if):   9 components
+
+================================================================================
