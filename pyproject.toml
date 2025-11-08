@@ -23,7 +23,10 @@ dependencies = [
     "misaki[en]>=0.9.4",
     "numpy",
     "torch",
-    "transformers"
+    "transformers",
+    "scikit-learn",
+    "gradio",
+    "soundfile"
 ]
 
 [project.scripts]
