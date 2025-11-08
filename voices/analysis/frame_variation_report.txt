@@ -1,0 +1,28 @@
+================================================================================
+FRAME VARIATION ANALYSIS REPORT
+================================================================================
+
+SUMMARY STATISTICS (across sampled voices)
+--------------------------------------------------------------------------------
+Average consecutive frame similarity: 0.999978
+Average decoder layer variance: 0.000781
+Average prosody layer variance: 0.006768
+Prosody/Decoder variance ratio: 8.67x
+Average components for 95% variance: 1.3
+Average components for 99% variance: 1.7
+
+INTERPRETATION
+--------------------------------------------------------------------------------
+✓ Frames are HIGHLY similar (>99.9% similarity)
+  → Frames are likely smoothly interpolated
+✓ Only ~1 components explain 95% variance
+  → Effective dimensionality is LOW
+  → Most frames are redundant
+
+RECOMMENDED EXPLORATION STRATEGY
+--------------------------------------------------------------------------------
+Strategy: SINGLE FRAME (frames are nearly identical)
+  - Use frame index ~50-100 (typical text length)
+  - Explore 256 dimensions (or focus on prosody: 128 dims)
+
+================================================================================

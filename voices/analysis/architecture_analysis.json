@@ -1,0 +1,377 @@
+{
+  "total_parameters": 81810022,
+  "trainable_parameters": 81810022,
+  "modules": {
+    "bert": {
+      "total_parameters": 6292480,
+      "trainable_parameters": 6292480,
+      "submodules": {
+        "embeddings": {
+          "type": "AlbertEmbeddings",
+          "total_parameters": 88832,
+          "trainable_parameters": 88832
+        },
+        "encoder": {
+          "type": "AlbertTransformer",
+          "total_parameters": 5613056,
+          "trainable_parameters": 5613056
+        },
+        "pooler": {
+          "type": "Linear",
+          "total_parameters": 590592,
+          "trainable_parameters": 590592,
+          "shape": "768 -> 768"
+        },
+        "pooler_activation": {
+          "type": "Tanh",
+          "total_parameters": 0,
+          "trainable_parameters": 0
+        }
+      }
+    },
+    "bert_encoder": {
+      "total_parameters": 393728,
+      "trainable_parameters": 393728,
+      "submodules": {}
+    },
+    "predictor": {
+      "total_parameters": 16203828,
+      "trainable_parameters": 16203828,
+      "submodules": {
+        "text_encoder": {
+          "type": "DurationEncoder",
+          "total_parameters": 5913600,
+          "trainable_parameters": 5913600
+        },
+        "lstm": {
+          "type": "LSTM",
+          "total_parameters": 1839104,
+          "trainable_parameters": 1839104,
+          "shape": "in=640, hidden=256, layers=1"
+        },
+        "duration_proj": {
+          "type": "LinearNorm",
+          "total_parameters": 25650,
+          "trainable_parameters": 25650
+        },
+        "shared": {
+          "type": "LSTM",
+          "total_parameters": 1839104,
+          "trainable_parameters": 1839104,
+          "shape": "in=640, hidden=256, layers=1"
+        },
+        "F0": {
+          "type": "ModuleList",
+          "total_parameters": 3292928,
+          "trainable_parameters": 3292928
+        },
+        "N": {
+          "type": "ModuleList",
+          "total_parameters": 3292928,
+          "trainable_parameters": 3292928
+        },
+        "F0_proj": {
+          "type": "Conv1d",
+          "total_parameters": 257,
+          "trainable_parameters": 257,
+          "shape": "in=256, out=1, k=(1,)"
+        },
+        "N_proj": {
+          "type": "Conv1d",
+          "total_parameters": 257,
+          "trainable_parameters": 257,
+          "shape": "in=256, out=1, k=(1,)"
+        }
+      }
+    },
+    "text_encoder": {
+      "total_parameters": 5606400,
+      "trainable_parameters": 5606400,
+      "submodules": {
+        "embedding": {
+          "type": "Embedding",
+          "total_parameters": 91136,
+          "trainable_parameters": 91136
+        },
+        "cnn": {
+          "type": "ModuleList",
+          "total_parameters": 3938304,
+          "trainable_parameters": 3938304
+        },
+        "lstm": {
+          "type": "LSTM",
+          "total_parameters": 1576960,
+          "trainable_parameters": 1576960,
+          "shape": "in=512, hidden=256, layers=1"
+        }
+      }
+    },
+    "decoder": {
+      "total_parameters": 53313586,
+      "trainable_parameters": 53313586,
+      "submodules": {
+        "encode": {
+          "type": "AdainResBlk1d",
+          "total_parameters": 5656072,
+          "trainable_parameters": 5656072
+        },
+        "decode": {
+          "type": "ModuleList",
+          "total_parameters": 27938666,
+          "trainable_parameters": 27938666
+        },
+        "F0_conv": {
+          "type": "ParametrizedConv1d",
+          "total_parameters": 5,
+          "trainable_parameters": 5,
+          "shape": "in=1, out=1, k=(3,)"
+        },
+        "N_conv": {
+          "type": "ParametrizedConv1d",
+          "total_parameters": 5,
+          "trainable_parameters": 5,
+          "shape": "in=1, out=1, k=(3,)"
+        },
+        "asr_res": {
+          "type": "Sequential",
+          "total_parameters": 32896,
+          "trainable_parameters": 32896
+        },
+        "generator": {
+          "type": "Generator",
+          "total_parameters": 19685942,
+          "trainable_parameters": 19685942
+        }
+      }
+    }
+  },
+  "bert_encoder": {
+    "config": {
+      "vocab_size": 178,
+      "embedding_size": 128,
+      "hidden_size": 768,
+      "num_hidden_layers": 12,
+      "num_attention_heads": 12,
+      "intermediate_size": 2048,
+      "max_position_embeddings": 512
+    },
+    "layer_structure": [
+      {
+        "layer_id": 0,
+        "attention": {
+          "num_heads": 12,
+          "head_dim": 64
+        },
+        "parameters": 5513984
+      }
+    ]
+  },
+  "prosody_predictor": {
+    "text_encoder": {
+      "total_parameters": 5913600,
+      "num_lstm_layers": 3
+    },
+    "lstm": {
+      "input_size": 640,
+      "hidden_size": 256,
+      "num_layers": 1,
+      "bidirectional": true,
+      "parameters": 1839104
+    },
+    "duration_proj": {},
+    "F0_branch": [
+      {
+        "block_id": 0,
+        "type": "AdainResBlk1d",
+        "parameters": 1841152
+      },
+      {
+        "block_id": 1,
+        "type": "AdainResBlk1d",
+        "parameters": 924416
+      },
+      {
+        "block_id": 2,
+        "type": "AdainResBlk1d",
+        "parameters": 527360
+      }
+    ],
+    "N_branch": [
+      {
+        "block_id": 0,
+        "type": "AdainResBlk1d",
+        "parameters": 1841152
+      },
+      {
+        "block_id": 1,
+        "type": "AdainResBlk1d",
+        "parameters": 924416
+      },
+      {
+        "block_id": 2,
+        "type": "AdainResBlk1d",
+        "parameters": 527360
+      }
+    ]
+  },
+  "text_encoder": {
+    "embedding": {
+      "num_embeddings": 178,
+      "embedding_dim": 512,
+      "parameters": 91136
+    },
+    "cnn_layers": [
+      {
+        "layer_id": 0,
+        "parameters": 1312768
+      },
+      {
+        "layer_id": 1,
+        "parameters": 1312768
+      },
+      {
+        "layer_id": 2,
+        "parameters": 1312768
+      }
+    ],
+    "lstm": {
+      "input_size": 512,
+      "hidden_size": 256,
+      "num_layers": 1,
+      "bidirectional": true,
+      "parameters": 1576960
+    }
+  },
+  "decoder": {
+    "encode": {
+      "type": "AdainResBlk1d",
+      "parameters": 5656072
+    },
+    "decode_blocks": [
+      {
+        "block_id": 0,
+        "type": "AdainResBlk1d",
+        "parameters": 8165128
+      },
+      {
+        "block_id": 1,
+        "type": "AdainResBlk1d",
+        "parameters": 8165128
+      },
+      {
+        "block_id": 2,
+        "type": "AdainResBlk1d",
+        "parameters": 8165128
+      },
+      {
+        "block_id": 3,
+        "type": "AdainResBlk1d",
+        "parameters": 3443282
+      }
+    ],
+    "generator": {
+      "total_parameters": 19685942,
+      "num_upsamples": 2,
+      "num_kernels": 3,
+      "upsampling_blocks": [
+        {
+          "block_id": 0,
+          "parameters": 2622208
+        },
+        {
+          "block_id": 1,
+          "parameters": 393600
+        }
+      ],
+      "resblocks": [
+        {
+          "block_id": 0,
+          "parameters": 1583616
+        },
+        {
+          "block_id": 1,
+          "parameters": 3156480
+        },
+        {
+          "block_id": 2,
+          "parameters": 4729344
+        },
+        {
+          "block_id": 3,
+          "parameters": 496896
+        },
+        {
+          "block_id": 4,
+          "parameters": 890112
+        },
+        {
+          "block_id": 5,
+          "parameters": 1283328
+        }
+      ]
+    }
+  },
+  "data_flow": {
+    "input": {
+      "phonemes": "String of phonemes",
+      "voice_embedding": "Tensor [T, 256] where T = len(phonemes)"
+    },
+    "stages": [
+      {
+        "name": "Input Processing",
+        "description": "Convert phonemes to input_ids using vocab",
+        "input_shape": "[B, T]",
+        "output_shape": "[B, T]"
+      },
+      {
+        "name": "BERT Encoding",
+        "module": "bert",
+        "description": "Process input_ids through ALBERT to get contextualized embeddings",
+        "input_shape": "[B, T]",
+        "output_shape": "[B, T, 768]"
+      },
+      {
+        "name": "BERT Projection",
+        "module": "bert_encoder",
+        "description": "Project BERT outputs to hidden dimension",
+        "input_shape": "[B, T, 768]",
+        "output_shape": "[B, hidden_dim, T]"
+      },
+      {
+        "name": "Duration Prediction",
+        "module": "predictor",
+        "description": "Predict phoneme durations using prosody style",
+        "style_input": "voice_embedding[:, 128:]",
+        "output": "duration tensor"
+      },
+      {
+        "name": "F0 and N Prediction",
+        "module": "predictor.F0Ntrain",
+        "description": "Predict pitch (F0) and noise (N) contours",
+        "output": "F0_pred, N_pred"
+      },
+      {
+        "name": "Text Encoding",
+        "module": "text_encoder",
+        "description": "Encode input through CNN+LSTM",
+        "output_shape": "[B, hidden_dim, T]"
+      },
+      {
+        "name": "Alignment",
+        "description": "Apply predicted alignment to expand features",
+        "output": "asr (aligned features)"
+      },
+      {
+        "name": "Decoding",
+        "module": "decoder",
+        "description": "Generate audio using iSTFTNet decoder",
+        "style_input": "voice_embedding[:, :128]",
+        "output_shape": "[audio_samples]"
+      }
+    ],
+    "output": {
+      "audio": "Waveform tensor at 24kHz sample rate",
+      "pred_dur": "Predicted duration for each phoneme"
+    }
+  }
+}
