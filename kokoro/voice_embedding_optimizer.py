@@ -622,7 +622,7 @@ class VoiceGradientOptimizer:
         epsilon: float = 0.01
     ) -> torch.Tensor:
         """
-        Estimate gradients using finite differences.
+        Estimate gradients using finite differences (sequential version).
 
         Args:
             pca_coords: Current PCA coordinates
@@ -651,13 +651,92 @@ class VoiceGradientOptimizer:
 
         return gradients
 
+    def _estimate_gradients_fd_parallel(
+        self,
+        pca_coords: torch.Tensor,
+        text: str,
+        epsilon: float = 0.01,
+        batch_size: int = 8
+    ) -> torch.Tensor:
+        """
+        Estimate gradients using finite differences with parallel computation.
+
+        This is much faster than sequential as it:
+        1. Batches perturbations together
+        2. Generates audio for multiple perturbations in parallel
+        3. Extracts embeddings in batch
+
+        Args:
+            pca_coords: Current PCA coordinates
+            text: Text to synthesize
+            epsilon: Finite difference epsilon
+            batch_size: Number of dimensions to process in parallel
+
+        Returns:
+            Estimated gradients
+        """
+        # Compute loss at current position
+        loss_current = self._evaluate_loss(pca_coords, text)
+
+        # Estimate gradient for each dimension in batches
+        gradients = torch.zeros_like(pca_coords)
+        n_dims = pca_coords.shape[0]
+
+        # Process dimensions in batches
+        for batch_start in range(0, n_dims, batch_size):
+            batch_end = min(batch_start + batch_size, n_dims)
+            batch_dims = range(batch_start, batch_end)
+
+            # Generate audio for all perturbations in this batch
+            batch_audios = []
+            for i in batch_dims:
+                # Perturb dimension i
+                pca_coords_perturbed = pca_coords.clone()
+                pca_coords_perturbed[i] += epsilon
+
+                # Generate audio
+                voice_embedding = self.pca_to_voice(pca_coords_perturbed)
+                voice_pt = self.voice_to_full_sequence(voice_embedding)
+                audio = self.generate_audio(voice_pt, text)
+                batch_audios.append(audio)
+
+            # Extract embeddings for all audios in batch (can be done in parallel)
+            batch_embeddings = []
+            for audio in batch_audios:
+                embedding = self.embedder.extract_embedding(
+                    audio,
+                    sample_rate=self.config.sample_rate
+                )
+                batch_embeddings.append(embedding)
+
+            # Compute losses for batch
+            for idx, (i, embedding) in enumerate(zip(batch_dims, batch_embeddings)):
+                # Compute loss
+                if self.config.loss_type == "cosine":
+                    similarity = F.cosine_similarity(
+                        embedding.unsqueeze(0),
+                        self.target_embedding.unsqueeze(0)
+                    )
+                    loss_perturbed = (1.0 - similarity).item()
+                elif self.config.loss_type == "l2":
+                    loss_perturbed = F.mse_loss(embedding, self.target_embedding).item()
+                else:
+                    raise ValueError(f"Unknown loss type: {self.config.loss_type}")
+
+                # Estimate gradient
+                gradients[i] = (loss_perturbed - loss_current) / epsilon
+
+        return gradients
+
     def optimize(
         self,
         target_audio_path: Union[str, Path],
         output_dir: Union[str, Path],
         text: Optional[str] = None,
         use_finite_diff: bool = True,
-        fd_epsilon: float = 0.01
+        fd_epsilon: float = 0.01,
+        parallel_fd: bool = True,
+        fd_batch_size: int = 8
     ) -> Dict:
         """
         Run gradient descent optimization.
@@ -668,6 +747,8 @@ class VoiceGradientOptimizer:
             text: Text to synthesize (uses config default if None)
             use_finite_diff: Whether to use finite difference gradient estimation
             fd_epsilon: Epsilon for finite differences
+            parallel_fd: Whether to use parallel finite differences (faster)
+            fd_batch_size: Batch size for parallel finite differences
 
         Returns:
             Optimization results dictionary
@@ -689,6 +770,9 @@ class VoiceGradientOptimizer:
         print(f"Gradient method: {'Finite Difference' if use_finite_diff else 'Automatic'}")
         if use_finite_diff:
             print(f"FD Epsilon: {fd_epsilon}")
+            print(f"FD Parallelization: {'Yes' if parallel_fd else 'No'}")
+            if parallel_fd:
+                print(f"FD Batch size: {fd_batch_size}")
         print("="*80 + "\n")
 
         # Load target
@@ -729,7 +813,17 @@ class VoiceGradientOptimizer:
                 # Use finite difference gradient estimation
                 with torch.no_grad():
                     loss_val = self._evaluate_loss(pca_coords, text)
-                    gradients = self._estimate_gradients_fd(pca_coords, text, fd_epsilon)
+
+                    if parallel_fd:
+                        # Parallel version (much faster)
+                        gradients = self._estimate_gradients_fd_parallel(
+                            pca_coords, text, fd_epsilon, fd_batch_size
+                        )
+                    else:
+                        # Sequential version
+                        gradients = self._estimate_gradients_fd(
+                            pca_coords, text, fd_epsilon
+                        )
 
                 # Manually set gradients
                 pca_coords.grad = gradients

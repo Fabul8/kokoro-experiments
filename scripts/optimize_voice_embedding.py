@@ -120,6 +120,17 @@ def main():
         default=0.01,
         help="Epsilon for finite difference gradient estimation"
     )
+    parser.add_argument(
+        "--no-parallel-fd",
+        action="store_true",
+        help="Disable parallel finite differences (slower but uses less memory)"
+    )
+    parser.add_argument(
+        "--fd-batch-size",
+        type=int,
+        default=8,
+        help="Batch size for parallel finite differences (higher = faster but more memory)"
+    )
 
     # Text generation
     parser.add_argument(
@@ -196,6 +207,9 @@ def main():
     print(f"  Gradient method: {args.gradient_method}")
     if args.gradient_method == "finite-diff":
         print(f"  FD epsilon: {args.fd_epsilon}")
+        print(f"  FD parallelization: {not args.no_parallel_fd}")
+        if not args.no_parallel_fd:
+            print(f"  FD batch size: {args.fd_batch_size}")
     print(f"\nDimensionality reduction:")
     print(f"  Variable dimensions: {args.n_variable_dims}")
     print(f"  PCA components: {args.pca_components}")
@@ -251,7 +265,9 @@ def main():
             output_dir=output_dir,
             text=args.text,
             use_finite_diff=(args.gradient_method == "finite-diff"),
-            fd_epsilon=args.fd_epsilon
+            fd_epsilon=args.fd_epsilon,
+            parallel_fd=(not args.no_parallel_fd),
+            fd_batch_size=args.fd_batch_size
         )
     except Exception as e:
         print(f"Error during optimization: {e}")
