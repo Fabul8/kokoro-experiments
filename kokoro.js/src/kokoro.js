@@ -7,8 +7,20 @@ const STYLE_DIM = 256;
 const SAMPLE_RATE = 24000;
 
 /**
+ * @typedef {Object} VoiceBinary
+ * @property {'binary'} type
+ * @property {string} url URL to the binary voice file
+ * @property {"a"|"b"} [language="a"] Language code ('a' for en-us, 'b' for en-gb)
+ *
+ * @typedef {Object} VoicePCA
+ * @property {'pca'} type
+ * @property {string} centroidUrl URL to the centroid binary file
+ * @property {string} componentsUrl URL to the PCA components binary file
+ * @property {number[]} pcaValues Pre-computed PCA weights
+ * @property {"a"|"b"} [language="a"] Language code ('a' for en-us, 'b' for en-gb)
+ *
  * @typedef {Object} GenerateOptions
- * @property {keyof typeof VOICES} [voice="af_heart"] The voice
+ * @property {keyof typeof VOICES | VoiceBinary | VoicePCA} [voice="af_heart"] The voice (preset name or custom voice object)
  * @property {number} [speed=1] The speaking speed
  */
 
@@ -55,6 +67,13 @@ export class KokoroTTS {
   }
 
   _validate_voice(voice) {
+    // Handle custom voice objects
+    if (typeof voice === 'object' && voice !== null) {
+      // Use the language field from the voice object, or default to 'a' (en-us)
+      return voice.language || 'a';
+    }
+
+    // Handle preset voice strings
     if (!VOICES.hasOwnProperty(voice)) {
       console.error(`Voice "${voice}" not found. Available voices:`);
       console.table(VOICES);
@@ -164,4 +183,4 @@ export const env = {
   },
 };
 
-export { TextSplitterStream };
+export { TextSplitterStream, VOICES, getVoiceData };

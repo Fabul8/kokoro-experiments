@@ -495,13 +495,156 @@ async function getVoiceFile(id) {
   return buffer;
 }
 
-const VOICE_CACHE = new Map();
-export async function getVoiceData(voice) {
-  if (VOICE_CACHE.has(voice)) {
-    return VOICE_CACHE.get(voice);
+/**
+ * Loads a binary file from a URL with caching.
+ * @param {string} url - The URL to fetch the binary file from
+ * @returns {Promise<ArrayBuffer>} The binary data
+ */
+async function loadBinaryFromUrl(url) {
+  let cache;
+  try {
+    cache = await caches.open("kokoro-voices");
+    const cachedResponse = await cache.match(url);
+    if (cachedResponse) {
+      return await cachedResponse.arrayBuffer();
+    }
+  } catch (e) {
+    console.warn("Unable to open cache", e);
   }
 
-  const buffer = new Float32Array(await getVoiceFile(voice));
-  VOICE_CACHE.set(voice, buffer);
+  // No cache, or cache failed to open. Fetch the file.
+  const response = await fetch(url);
+  const buffer = await response.arrayBuffer();
+
+  if (cache) {
+    try {
+      await cache.put(
+        url,
+        new Response(buffer, {
+          headers: response.headers,
+        }),
+      );
+    } catch (e) {
+      console.warn("Unable to cache file", e);
+    }
+  }
+
   return buffer;
+}
+
+/**
+ * Reconstructs a voice from PCA components and weights.
+ * @param {Float32Array} centroid - The centroid voice (130560 floats)
+ * @param {Float32Array} components - PCA components (K × 130560 floats)
+ * @param {number[]} pcaValues - Pre-computed PCA weights
+ * @returns {Float32Array} The reconstructed voice (130560 floats)
+ */
+function reconstructVoiceFromPCA(centroid, components, pcaValues) {
+  const N = 130560;  // 510 * 256
+  const K = pcaValues.length;
+
+  // voice = centroid (clone)
+  const voice = new Float32Array(centroid);
+
+  // voice += Σ pcaValues[i] × PCA_components[i]
+  for (let i = 0; i < K; i++) {
+    const weight = pcaValues[i];
+    const pcOffset = i * N;
+    for (let j = 0; j < N; j++) {
+      voice[j] += weight * components[pcOffset + j];
+    }
+  }
+
+  return voice;
+}
+
+const VOICE_CACHE = new Map();
+const BINARY_CACHE = new Map();
+const PCA_CACHE = new Map();
+
+/**
+ * Loads voice data from various sources.
+ * @param {string|Object} voice - Voice identifier or voice configuration object
+ * @returns {Promise<Float32Array>} The voice data (130560 floats)
+ *
+ * @example
+ * // Preset voice
+ * const voice1 = await getVoiceData("af_heart");
+ *
+ * // Binary voice from URL
+ * const voice2 = await getVoiceData({
+ *   type: 'binary',
+ *   url: 'https://example.com/my-voice.bin'
+ * });
+ *
+ * // PCA-based voice
+ * const voice3 = await getVoiceData({
+ *   type: 'pca',
+ *   centroidUrl: 'https://example.com/centroid.bin',
+ *   componentsUrl: 'https://example.com/pca_components.bin',
+ *   pcaValues: [0.5, -0.2, 0.8, ...] // Pre-computed PCA weights
+ * });
+ */
+export async function getVoiceData(voice) {
+  // Handle preset voices (backward compatible)
+  if (typeof voice === 'string') {
+    if (VOICE_CACHE.has(voice)) {
+      return VOICE_CACHE.get(voice);
+    }
+
+    const buffer = new Float32Array(await getVoiceFile(voice));
+    VOICE_CACHE.set(voice, buffer);
+    return buffer;
+  }
+
+  // Handle custom voice objects
+  if (typeof voice === 'object' && voice !== null) {
+    // Binary voice from URL
+    if (voice.type === 'binary') {
+      const cacheKey = voice.url;
+      if (BINARY_CACHE.has(cacheKey)) {
+        return BINARY_CACHE.get(cacheKey);
+      }
+
+      const buffer = new Float32Array(await loadBinaryFromUrl(voice.url));
+      BINARY_CACHE.set(cacheKey, buffer);
+      return buffer;
+    }
+
+    // PCA-based voice
+    if (voice.type === 'pca') {
+      const cacheKey = JSON.stringify({
+        centroidUrl: voice.centroidUrl,
+        componentsUrl: voice.componentsUrl,
+        pcaValues: voice.pcaValues
+      });
+
+      if (PCA_CACHE.has(cacheKey)) {
+        return PCA_CACHE.get(cacheKey);
+      }
+
+      // Load PCA data in parallel
+      const [centroidBuffer, componentsBuffer] = await Promise.all([
+        loadBinaryFromUrl(voice.centroidUrl),
+        loadBinaryFromUrl(voice.componentsUrl)
+      ]);
+
+      const centroid = new Float32Array(centroidBuffer);
+      const components = new Float32Array(componentsBuffer);
+
+      // Reconstruct voice from PCA
+      const reconstructed = reconstructVoiceFromPCA(
+        centroid,
+        components,
+        voice.pcaValues
+      );
+
+      PCA_CACHE.set(cacheKey, reconstructed);
+      return reconstructed;
+    }
+
+    throw new Error(`Unknown voice type: ${voice.type}`);
+  }
+
+  throw new Error(`Invalid voice parameter. Expected string or object, got ${typeof voice}`);
 }
